@@ -2,7 +2,9 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
+from api.models.analysis_response import AnalysisResponse
 from api.repositories.postgres_repository import PostgresDB
+from api.services.llm_service import analyze_journal_entry as analyze_journal_entry_llm
 
 logger = logging.getLogger("journal")
 
@@ -58,14 +60,22 @@ class EntryService:
         logger.debug("Entry %s updated", entry_id)
         return updated_data
 
-    async def delete_entry(self, entry_id: str) -> None:
+    async def delete_entry(self, entry_id: str) -> bool:
         """Deletes a specific entry."""
         logger.info("Deleting entry %s", entry_id)
-        await self.db.delete_entry(entry_id)
-        logger.debug("Entry %s deleted", entry_id)
+        deleted = await self.db.delete_entry(entry_id)
+        if deleted:
+            logger.debug("Entry %s deleted", entry_id)
+        else:
+            logger.warning("Entry %s not found. Delete aborted.", entry_id)
+        return deleted
 
     async def delete_all_entries(self) -> None:
         """Deletes all entries."""
         logger.info("Deleting all entries")
         await self.db.delete_all_entries()
         logger.debug("All entries deleted")
+
+    async def analyze_journal_entry(self, entry_id: str) -> AnalysisResponse | None:
+        """Analyzes a journal entry using the LLM service."""
+        return await analyze_journal_entry_llm(self, entry_id)
