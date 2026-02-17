@@ -110,11 +110,10 @@ class PostgresDB(DatabaseInterface):
             """
             await conn.execute(query, entry_id, data_json, updated_at)
 
-    async def delete_entry(self, entry_id: str) -> bool:
+    async def delete_entry(self, entry_id: str) -> None:
         async with self.pool.acquire() as conn:
             query = "DELETE FROM entries WHERE id = $1"
-            result = await conn.execute(query, entry_id)
-            return result == "DELETE 1"
+            await conn.execute(query, entry_id)
 
     async def delete_all_entries(self) -> None:
         async with self.pool.acquire() as conn:

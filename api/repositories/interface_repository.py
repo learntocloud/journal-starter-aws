@@ -26,7 +26,7 @@ class DatabaseInterface(ABC):
         pass
 
     @abstractmethod
-    async def delete_entry(self, entry_id: str) -> bool:
+    async def delete_entry(self, entry_id: str) -> None:
         """Delete a specific journal entry."""
         pass
 
